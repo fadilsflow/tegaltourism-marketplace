@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -18,41 +17,35 @@ type Props = {
 type Destination = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
 };
 
-export function AreaSelect({ value, onChange, disabled }: Props) {
-  const { data, isLoading } = useQuery<Destination[]>({
-    queryKey: ["destinations"],
-    queryFn: async () => {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const res = await fetch(`${baseUrl}/api/destination`);
-      if (!res.ok) throw new Error("Gagal memuat destinasi");
-      return res.json();
-    },
-  });
+const DESTINATIONS: Destination[] = [
+  { id: "sindang", name: "Sindang Kemad" },
+  { id: "cempaka", name: "Desa Cempaka" },
+  { id: "guci", name: "Guci" },
+  { id: "sigedong", name: "Sigedong" },
+  { id: "sawahbatu", name: "Sawah Batu" },
+  { id: "lembah_rembulan", name: "Lembah Rembulan" },
+  { id: "semedo", name: "Museum Semedo" },
+  { id: "cacaban", name: "Cacaban" },
+  { id: "purin", name: "Purwahamba" },
+  { id: "penusupan", name: "Desa Wisata Karang Cengis" },
+  { id: "kalimus", name: "Kalimus" },
+];
 
+export function AreaSelect({ value, onChange, disabled }: Props) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger className="w-full">
-        <SelectValue
-          placeholder={isLoading ? "Memuat..." : "Pilih Destinasi"}
-        />
+        <SelectValue placeholder="Pilih Destinasi" />
       </SelectTrigger>
 
       <SelectContent className="w-full">
-        {data && data.length > 0 ? (
-          data.map((dest) => (
-            <SelectItem key={dest.id} value={dest.id}>
-              {dest.name}
-            </SelectItem>
-          ))
-        ) : (
-          <SelectItem disabled value="none">
-            Tidak ada destinasi tersedia
+        {DESTINATIONS.map((dest) => (
+          <SelectItem key={dest.id} value={dest.id}>
+            {dest.name}
           </SelectItem>
-        )}
+        ))}
       </SelectContent>
     </Select>
   );

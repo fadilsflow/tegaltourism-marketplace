@@ -50,9 +50,23 @@ type Product = {
 type Destination = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 };
+
+const DESTINATIONS: Destination[] = [
+  { id: "sindang", name: "Sindang Kemad" },
+  { id: "cempaka", name: "Desa Cempaka" },
+  { id: "guci", name: "Guci" },
+  { id: "sigedong", name: "Sigedong" },
+  { id: "sawahbatu", name: "Sawah Batu" },
+  { id: "lembah_rembulan", name: "Lembah Rembulan" },
+  { id: "semedo", name: "Museum Semedo" },
+  { id: "cacaban", name: "Cacaban" },
+  { id: "purin", name: "Purwahamba" },
+  { id: "penusupan", name: "Desa Wisata Karang Cengis" },
+  { id: "kalimus", name: "Kalimus" },
+];
 
 export default function StoreDetailPage({
   params,
@@ -71,15 +85,8 @@ export default function StoreDetailPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
 
-  const { data: destinations } = useQuery({
-    queryKey: ["destinations"],
-    queryFn: async () => {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const res = await fetch(baseUrl!);
-      if (!res.ok) throw new Error("Gagal memuat destinasi");
-      return res.json() as Promise<Destination[]>;
-    },
-  });
+  // Use hardcoded destinations instead of API call
+  const destinations = DESTINATIONS;
 
   // Fetch store details and products
   const {
@@ -107,7 +114,7 @@ export default function StoreDetailPage({
   const pagination = storeData?.pagination;
 
   const areaName = store?.areaId
-    ? destinations?.find((dest) => dest.id === store.areaId)?.name
+    ? destinations.find((dest) => dest.id === store.areaId)?.name
     : null;
 
   // Filter products by search term (client-side filtering)
@@ -269,7 +276,7 @@ export default function StoreDetailPage({
             <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-muted-foreground flex-wrap">
               {areaName && store.areaId && (
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/blog/${store.areaId}`}
+                  href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/deskripsi/${store.areaId}.php`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center hover:text-primary transition-colors"

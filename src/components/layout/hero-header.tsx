@@ -94,7 +94,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <LogoIcon className="w-6 h-6 " />
-              <span className="font-bold text-primary text-2xl hidden md:block">JRM</span>
+              <span className="font-bold text-primary text-2xl hidden md:block">TTM</span>
             </Link>
           </div>
 
@@ -102,7 +102,7 @@ export function Header() {
           <div className="flex-1 max-w-md sm:max-w-lg md:max-w-xl">
             <form onSubmit={handleSearch} className="relative">
               <Input
-                placeholder="Cari produk atau toko"
+                placeholder="Cari destinasi wisata atau produk"
                 className="w-full pr-10 bg-background"
                 value={globalQuery}
                 onChange={(e) => setGlobalQuery(e.target.value)}
@@ -130,7 +130,7 @@ export function Header() {
                         )
                       }
                     >
-                      Cari Product/Toko &quot;{debouncedQuery}&quot;
+                      Cari Destinasi/Produk &quot;{debouncedQuery}&quot;
                     </button>
                     {(productSuggest?.products?.length || 0) > 0 && (
                       <div className="mt-1">
@@ -200,7 +200,7 @@ export function Header() {
                 <Link href={storeHref}>
                   <Button variant="outline">
                     <Store className="h-4 w-4 mr-2" />
-                    Toko
+                    Mitra
                   </Button>
                 </Link>
                 <UserButton />

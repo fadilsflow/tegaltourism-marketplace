@@ -26,7 +26,7 @@ export async function getSystemSetting(key: string): Promise<string | null> {
  */
 export async function getServiceFeePercentage(): Promise<number> {
   const value = await getSystemSetting("service_fee_percentage");
-  
+
   // If no value found, try to create default settings
   if (!value) {
     try {
@@ -47,7 +47,7 @@ export async function getServiceFeePercentage(): Promise<number> {
       return 5; // Fallback to default
     }
   }
-  
+
   const percentage = parseFloat(value);
   return Math.max(0, Math.min(100, percentage)); // Ensure it's between 0-100%
 }

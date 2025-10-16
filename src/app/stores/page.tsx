@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Store, Search } from "lucide-react";
+import { Store, Search, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,25 @@ type Store = {
   createdAt: string;
   updatedAt: string;
 };
+
+type Destination = {
+  id: string;
+  name: string;
+};
+
+const DESTINATIONS: Destination[] = [
+  { id: "sindang", name: "Sindang Kemad" },
+  { id: "cempaka", name: "Desa Cempaka" },
+  { id: "guci", name: "Guci" },
+  { id: "sigedong", name: "Sigedong" },
+  { id: "sawahbatu", name: "Sawah Batu" },
+  { id: "lembah_rembulan", name: "Lembah Rembulan" },
+  { id: "semedo", name: "Museum Semedo" },
+  { id: "cacaban", name: "Cacaban" },
+  { id: "purin", name: "Purwahamba" },
+  { id: "penusupan", name: "Desa Wisata Karang Cengis" },
+  { id: "kalimus", name: "Kalimus" },
+];
 
 export default function StoresPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,6 +93,11 @@ export default function StoresPage() {
   const stores = storesData?.stores || [];
   const pagination = storesData?.pagination;
 
+  // Helper function to get destination name by ID
+  const getDestinationName = (areaId: string) => {
+    return DESTINATIONS.find(dest => dest.id === areaId)?.name || areaId;
+  };
+
   // Loading skeleton component
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -102,9 +126,9 @@ export default function StoresPage() {
     return (
       <div className="container mx-auto py-8 px-6 md:px-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Jelajahi Toko</h1>
+          <h1 className="text-3xl font-bold mb-2">Jelajahi Mitra Wisata</h1>
           <p className="text-muted-foreground text-lg">
-            Temukan berbagai toko rempah dan bumbu pilihan
+            Temukan berbagai mitra dan produk khas dari destinasi wisata Tegal
           </p>
         </div>
 
@@ -112,7 +136,7 @@ export default function StoresPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Cari toko..."
+              placeholder="Cari mitra wisata..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -170,10 +194,10 @@ export default function StoresPage() {
     <div className="container mx-auto py-8 px-6 md:px-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Jelajahi Toko</h1>
+        <h1 className="text-3xl font-bold mb-2">Jelajahi Mitra Wisata</h1>
         <p className="text-muted-foreground text-lg">
-          Temukan berbagai toko rempah dan bumbu pilihan (
-          {pagination?.total || 0} toko)
+          Temukan berbagai mitra dan produk khas dari destinasi wisata Tegal (
+          {pagination?.total || 0} mitra)
         </p>
       </div>
 
@@ -182,7 +206,7 @@ export default function StoresPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Cari toko..."
+            placeholder="Cari mitra wisata..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -220,12 +244,12 @@ export default function StoresPage() {
           <div className="col-span-full flex flex-col items-center justify-center py-12">
             <Store className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              {searchTerm ? "Toko tidak ditemukan" : "Belum ada toko"}
+              {searchTerm ? "Mitra tidak ditemukan" : "Belum ada mitra"}
             </h3>
             <p className="text-muted-foreground text-center">
               {searchTerm
-                ? "Coba gunakan kata kunci yang berbeda untuk mencari toko"
-                : "Belum ada toko yang terdaftar di platform ini"}
+                ? "Coba gunakan kata kunci yang berbeda untuk mencari mitra"
+                : "Belum ada mitra yang terdaftar di platform ini"}
             </p>
           </div>
         ) : (
@@ -259,6 +283,11 @@ export default function StoresPage() {
                   </div>
                 </div>
                 <div>
+                  <div className="flex items-center text-sm text-muted-foreground mb-2">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {getDestinationName(store.areaId)}
+                  </div>
+
                   {store.description && (
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {store.description}
@@ -267,7 +296,7 @@ export default function StoresPage() {
 
                   <div className="justify-end flex">
                     <Button variant={"outline"} size={"sm"}>
-                      Kunjungi Toko
+                      Kunjungi Mitra
                     </Button>
                   </div>
                 </div>
@@ -281,7 +310,7 @@ export default function StoresPage() {
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between space-x-2 py-8">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Toko per halaman</p>
+            <p className="text-sm font-medium">Mitra per halaman</p>
             <Select
               value={pageSize.toString()}
               onValueChange={(value) => {
