@@ -1,0 +1,1 @@
+ALTER TABLE "order" ADD COLUMN "service_fee" numeric(10, 2) DEFAULT '0.00' NOT NULL;

@@ -1,0 +1,1 @@
+ALTER TABLE "store" ADD COLUMN "area_id" text;
