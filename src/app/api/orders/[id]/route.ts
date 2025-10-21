@@ -183,17 +183,32 @@ export async function PUT(
         return createErrorResponse("Unauthorized to update this order", 403);
       }
 
-      // Update order status
-      const updatedOrder = await db
+      // Update order status 
+      await db
         .update(order)
         .set({
           status,
           updatedAt: new Date(),
         })
         .where(eq(order.id, id))
-        .returning();
+        .execute();
 
-      return createSuccessResponse(updatedOrder[0]);
+      const updated = await db
+        .select({
+          id: order.id,
+          buyerId: order.buyerId,
+          status: order.status,
+          total: order.total,
+          serviceFee: order.serviceFee,
+          buyerServiceFee: order.buyerServiceFee,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+        })
+        .from(order)
+        .where(eq(order.id, id))
+        .limit(1);
+
+      return createSuccessResponse(updated[0]);
     } catch (error) {
       console.error("Error updating order:", error);
       return createErrorResponse("Failed to update order", 500);

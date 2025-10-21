@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { store } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { 
-  withAuth, 
-  withoutAuth, 
-  createErrorResponse, 
+import {
+  withAuth,
+  withoutAuth,
+  createErrorResponse,
   createSuccessResponse,
-  validateRequestBody
+  validateRequestBody,
 } from "@/lib/api-utils";
 import { updateStoreSchema } from "@/lib/validations";
 
@@ -97,16 +97,32 @@ export async function PUT(
       }
 
       // Update store
-      const updatedStore = await db
+      await db
         .update(store)
         .set({
           ...updateData,
           updatedAt: new Date(),
         })
         .where(eq(store.id, id))
-        .returning();
+        .execute();
 
-      return createSuccessResponse(updatedStore[0]);
+      const updated = await db
+        .select({
+          id: store.id,
+          ownerId: store.ownerId,
+          name: store.name,
+          slug: store.slug,
+          areaId: store.areaId,
+          description: store.description,
+          logo: store.logo,
+          createdAt: store.createdAt,
+          updatedAt: store.updatedAt,
+        })
+        .from(store)
+        .where(eq(store.id, id))
+        .limit(1);
+
+      return createSuccessResponse(updated[0]);
     } catch (error) {
       console.error("Error updating store:", error);
       return createErrorResponse("Failed to update store", 500);
@@ -141,9 +157,7 @@ export async function DELETE(
       }
 
       // Delete store (cascade will handle related products)
-      await db
-        .delete(store)
-        .where(eq(store.id, id));
+      await db.delete(store).where(eq(store.id, id));
 
       return createSuccessResponse({ message: "Store deleted successfully" });
     } catch (error) {

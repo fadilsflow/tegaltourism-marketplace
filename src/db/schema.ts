@@ -1,30 +1,27 @@
 import {
-  pgTable,
+  mysqlTable as pgTable,
   text,
   timestamp,
   boolean,
-  numeric,
-  integer,
-} from "drizzle-orm/pg-core";
+  decimal as numeric,
+  int as integer,
+  varchar,
+} from "drizzle-orm/mysql-core";
 
 /* ======================
    AUTH -> better-auth generated
    ====================== */
 
 export const user = pgTable("user", {
-  id: text("id").primaryKey(),
+  id: varchar("id", { length: 191 }).primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull().unique(),
+  email: varchar("email", { length: 191 }).notNull().unique(),
   emailVerified: boolean("email_verified")
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // Admin plugin fields
   role: text("role").default("user"),
   banned: boolean("banned").default(false),
@@ -33,14 +30,14 @@ export const user = pgTable("user", {
 });
 
 export const session = pgTable("session", {
-  id: text("id").primaryKey(),
+  id: varchar("id", { length: 191 }).primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  token: varchar("token", { length: 191 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  userId: text("user_id")
+  userId: varchar("user_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   // Admin plugin field
@@ -48,10 +45,10 @@ export const session = pgTable("session", {
 });
 
 export const account = pgTable("account", {
-  id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  accountId: varchar("account_id", { length: 191 }).notNull(),
+  providerId: varchar("provider_id", { length: 191 }).notNull(),
+  userId: varchar("user_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
@@ -61,33 +58,29 @@ export const account = pgTable("account", {
   refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
   scope: text("scope"),
   password: text("password"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const verification = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
+  id: varchar("id", { length: 191 }).primaryKey(),
+  identifier: varchar("identifier", { length: 191 }).notNull(),
+  value: varchar("value", { length: 191 }).notNull(),
   expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
-  updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 /* ======================
    STORE & PRODUCT
    ====================== */
 export const store = pgTable("store", {
-  id: text("id").primaryKey(),
-  ownerId: text("owner_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  ownerId: varchar("owner_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(), // /store/[slug]
+  slug: varchar("slug", { length: 191 }).notNull().unique(), // /store/[slug]
   areaId: text("area_id"),
   description: text("description"),
   logo: text("logo"),
@@ -96,12 +89,12 @@ export const store = pgTable("store", {
 });
 
 export const product = pgTable("product", {
-  id: text("id").primaryKey(),
-  storeId: text("store_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  storeId: varchar("store_id", { length: 191 })
     .notNull()
     .references(() => store.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(), // /product/[slug]
+  slug: varchar("slug", { length: 191 }).notNull().unique(), // /product/[slug]
   description: text("description"),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   stock: integer("stock").notNull(),
@@ -115,8 +108,8 @@ export const product = pgTable("product", {
    ADDRESS
    ====================== */
 export const address = pgTable("address", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  userId: varchar("user_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   recipientName: text("recipient_name").notNull(),
@@ -133,8 +126,8 @@ export const address = pgTable("address", {
    CART
    ====================== */
 export const cart = pgTable("cart", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  userId: varchar("user_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -142,11 +135,11 @@ export const cart = pgTable("cart", {
 });
 
 export const cartItem = pgTable("cart_item", {
-  id: text("id").primaryKey(),
-  cartId: text("cart_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  cartId: varchar("cart_id", { length: 191 })
     .notNull()
     .references(() => cart.id, { onDelete: "cascade" }),
-  productId: text("product_id")
+  productId: varchar("product_id", { length: 191 })
     .notNull()
     .references(() => product.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull(),
@@ -156,30 +149,34 @@ export const cartItem = pgTable("cart_item", {
    ORDER
    ====================== */
 export const order = pgTable("order", {
-  id: text("id").primaryKey(),
-  buyerId: text("buyer_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  buyerId: varchar("buyer_id", { length: 191 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  addressId: text("address_id")
+  addressId: varchar("address_id", { length: 191 })
     .notNull()
     .references(() => address.id, { onDelete: "restrict" }),
   status: text("status").$defaultFn(() => "pending"), // pending, paid, shipped, completed, cancelled
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
-  serviceFee: numeric("service_fee", { precision: 10, scale: 2 }).notNull().default("0.00"),
-  buyerServiceFee: numeric("buyer_service_fee", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  serviceFee: numeric("service_fee", { precision: 10, scale: 2 })
+    .notNull()
+    .default("0.00"),
+  buyerServiceFee: numeric("buyer_service_fee", { precision: 10, scale: 2 })
+    .notNull()
+    .default("0.00"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const orderItem = pgTable("order_item", {
-  id: text("id").primaryKey(),
-  orderId: text("order_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  orderId: varchar("order_id", { length: 191 })
     .notNull()
     .references(() => order.id, { onDelete: "cascade" }),
-  productId: text("product_id")
+  productId: varchar("product_id", { length: 191 })
     .notNull()
     .references(() => product.id, { onDelete: "cascade" }),
-  storeId: text("store_id")
+  storeId: varchar("store_id", { length: 191 })
     .notNull()
     .references(() => store.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull(),
@@ -190,14 +187,14 @@ export const orderItem = pgTable("order_item", {
    PAYMENT (Midtrans)
    ====================== */
 export const payment = pgTable("payment", {
-  id: text("id").primaryKey(),
-  orderId: text("order_id")
+  id: varchar("id", { length: 191 }).primaryKey(),
+  orderId: varchar("order_id", { length: 191 })
     .notNull()
     .references(() => order.id, { onDelete: "cascade" }),
-  transactionId: text("transaction_id").notNull(), // dari Midtrans
+  transactionId: varchar("transaction_id", { length: 191 }).notNull(), // dari Midtrans
   status: text("status").$defaultFn(() => "pending"), // pending, settlement, deny, expire, cancel
   grossAmount: numeric("gross_amount", { precision: 10, scale: 2 }).notNull(),
-  paymentType: text("payment_type"), // e.g. bank_transfer, gopay
+  paymentType: varchar("payment_type", { length: 191 }), // e.g. bank_transfer, gopay
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -206,8 +203,8 @@ export const payment = pgTable("payment", {
    SYSTEM SETTINGS
    ====================== */
 export const systemSettings = pgTable("system_settings", {
-  id: text("id").primaryKey(),
-  key: text("key").notNull().unique(),
+  id: varchar("id", { length: 191 }).primaryKey(),
+  key: varchar("key", { length: 191 }).notNull().unique(),
   value: text("value").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

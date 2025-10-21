@@ -177,10 +177,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Create payment record
-      const newPayment = await db
+      const newPaymentId = generateId();
+      await db
         .insert(payment)
         .values({
-          id: generateId(),
+          id: newPaymentId,
           orderId,
           transactionId: snapData.token,
           status: "pending",
@@ -192,11 +193,25 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .execute();
+
+      const inserted = await db
+        .select({
+          id: payment.id,
+          transactionId: payment.transactionId,
+          status: payment.status,
+          grossAmount: payment.grossAmount,
+          paymentType: payment.paymentType,
+          createdAt: payment.createdAt,
+          updatedAt: payment.updatedAt,
+        })
+        .from(payment)
+        .where(eq(payment.id, newPaymentId))
+        .limit(1);
 
       return createSuccessResponse(
         {
-          payment: newPayment[0],
+          payment: inserted[0],
           redirect_url: snapData.redirect_url, // used in frontend
           token: snapData.token,
         },

@@ -159,11 +159,12 @@ export async function POST(request: NextRequest) {
         return createErrorResponse("Product slug already exists");
       }
 
-      // Create new product
-      const newProduct = await db
+      // Create new product 
+      const newId = generateId();
+      await db
         .insert(product)
         .values({
-          id: generateId(),
+          id: newId,
           storeId,
           name,
           slug,
@@ -175,9 +176,27 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .execute();
 
-      return createSuccessResponse(newProduct[0], 201);
+      const inserted = await db
+        .select({
+          id: product.id,
+          storeId: product.storeId,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          price: product.price,
+          stock: product.stock,
+          image: product.image,
+          status: product.status,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+        })
+        .from(product)
+        .where(eq(product.id, newId))
+        .limit(1);
+
+      return createSuccessResponse(inserted[0], 201);
     } catch (error) {
       console.error("Error creating product:", error);
       return createErrorResponse("Failed to create product", 500);

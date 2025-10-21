@@ -136,11 +136,12 @@ export async function POST(request: NextRequest) {
         return createErrorResponse("Store slug already exists");
       }
 
-      // Create new store
-      const newStore = await db
+      // Create new store (MySQL: tidak mendukung .returning())
+      const newId = generateId();
+      await db
         .insert(store)
         .values({
-          id: generateId(),
+          id: newId,
           ownerId: user.id,
           name,
           slug,
@@ -150,9 +151,24 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .execute();
 
-      return createSuccessResponse(newStore[0], 201);
+      const inserted = await db
+        .select({
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          areaId: store.areaId,
+          description: store.description,
+          logo: store.logo,
+          createdAt: store.createdAt,
+          updatedAt: store.updatedAt,
+        })
+        .from(store)
+        .where(eq(store.id, newId))
+        .limit(1);
+
+      return createSuccessResponse(inserted[0], 201);
     } catch (error) {
       console.error("Error creating store:", error);
       return createErrorResponse("Failed to create store", 500);

@@ -86,14 +86,30 @@ export async function PUT(
           .where(eq(address.userId, user.id));
       }
 
-      // Update address
-      const updatedAddress = await db
+      // Update address 
+      await db
         .update(address)
         .set(updateData)
         .where(and(eq(address.id, id), eq(address.userId, user.id)))
-        .returning();
+        .execute();
 
-      return createSuccessResponse(updatedAddress[0]);
+      const updated = await db
+        .select({
+          id: address.id,
+          recipientName: address.recipientName,
+          phone: address.phone,
+          street: address.street,
+          city: address.city,
+          province: address.province,
+          postalCode: address.postalCode,
+          isDefault: address.isDefault,
+          createdAt: address.createdAt,
+        })
+        .from(address)
+        .where(and(eq(address.id, id), eq(address.userId, user.id)))
+        .limit(1);
+
+      return createSuccessResponse(updated[0]);
     } catch (error) {
       console.error("Error updating address:", error);
       return createErrorResponse("Failed to update address", 500);

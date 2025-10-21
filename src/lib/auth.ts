@@ -6,7 +6,7 @@ import { admin } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "mysql",
     schema: authSchema,
   }),
   emailAndPassword: {
@@ -26,11 +26,11 @@ export const auth = betterAuth({
   cookies: {
     prefix: "ba_", // match this with client
   },
-  plugins: [ 
-    nextCookies(), 
+  plugins: [
+    nextCookies(),
     admin({
       defaultRole: "user",
       adminRoles: ["admin"],
-    })
+    }),
   ],
 });

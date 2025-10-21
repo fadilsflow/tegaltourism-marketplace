@@ -198,11 +198,12 @@ export async function POST(request: NextRequest) {
       // Calculate buyer service fee using database value
       const buyerServiceFeeAmount = await getBuyerServiceFee();
 
-      // Create order
-      const newOrder = await db
+      // Create order 
+      const newOrderId = generateId();
+      await db
         .insert(order)
         .values({
-          id: generateId(),
+          id: newOrderId,
           buyerId: user.id,
           addressId,
           status: "pending",
@@ -212,22 +213,22 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .execute();
 
       // Create order items
-      const orderItems = await db
+      await db
         .insert(orderItem)
         .values(
           validatedItems.map((item) => ({
             id: generateId(),
-            orderId: newOrder[0].id,
+            orderId: newOrderId,
             productId: item.productId,
             storeId: item.storeId,
             quantity: item.quantity,
             price: item.price,
           }))
         )
-        .returning();
+        .execute();
 
       // Update product stock
       for (const item of validatedItems) {
@@ -258,11 +259,33 @@ export async function POST(request: NextRequest) {
         await db.delete(cartItem).where(eq(cartItem.cartId, userCart[0].id));
       }
 
+      const insertedOrder = await db
+        .select({
+          id: order.id,
+          status: order.status,
+          total: order.total,
+          serviceFee: order.serviceFee,
+          buyerServiceFee: order.buyerServiceFee,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+        })
+        .from(order)
+        .where(eq(order.id, newOrderId))
+        .limit(1);
+
+      const insertedItems = await db
+        .select({
+          id: orderItem.id,
+          quantity: orderItem.quantity,
+          price: orderItem.price,
+          productId: orderItem.productId,
+          storeId: orderItem.storeId,
+        })
+        .from(orderItem)
+        .where(eq(orderItem.orderId, newOrderId));
+
       return createSuccessResponse(
-        {
-          order: newOrder[0],
-          items: orderItems,
-        },
+        { order: insertedOrder[0], items: insertedItems },
         201
       );
     } catch (error) {

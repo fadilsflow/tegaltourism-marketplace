@@ -2,11 +2,11 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { cart, cartItem, product } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { 
-  withAuth, 
-  createErrorResponse, 
+import {
+  withAuth,
+  createErrorResponse,
   createSuccessResponse,
-  validateRequestBody
+  validateRequestBody,
 } from "@/lib/api-utils";
 import { updateCartItemSchema } from "@/lib/validations";
 
@@ -20,7 +20,10 @@ export async function PUT(
   return withAuth(request, async (req, user) => {
     const { itemId } = await params;
 
-    const validationResult = await validateRequestBody(req, updateCartItemSchema);
+    const validationResult = await validateRequestBody(
+      req,
+      updateCartItemSchema
+    );
     if (validationResult.error) {
       return createErrorResponse(validationResult.error);
     }
@@ -47,10 +50,9 @@ export async function PUT(
           quantity: cartItem.quantity,
         })
         .from(cartItem)
-        .where(and(
-          eq(cartItem.id, itemId),
-          eq(cartItem.cartId, userCart[0].id)
-        ))
+        .where(
+          and(eq(cartItem.id, itemId), eq(cartItem.cartId, userCart[0].id))
+        )
         .limit(1);
 
       if (existingItem.length === 0) {
@@ -81,13 +83,19 @@ export async function PUT(
       }
 
       // Update cart item
-      const updatedItem = await db
+      await db
         .update(cartItem)
         .set({ quantity })
         .where(eq(cartItem.id, itemId))
-        .returning();
+        .execute();
 
-      return createSuccessResponse(updatedItem[0]);
+      const updated = await db
+        .select({ id: cartItem.id, quantity: cartItem.quantity })
+        .from(cartItem)
+        .where(eq(cartItem.id, itemId))
+        .limit(1);
+
+      return createSuccessResponse(updated[0]);
     } catch (error) {
       console.error("Error updating cart item:", error);
       return createErrorResponse("Failed to update cart item", 500);
@@ -121,10 +129,9 @@ export async function DELETE(
       const existingItem = await db
         .select({ id: cartItem.id })
         .from(cartItem)
-        .where(and(
-          eq(cartItem.id, itemId),
-          eq(cartItem.cartId, userCart[0].id)
-        ))
+        .where(
+          and(eq(cartItem.id, itemId), eq(cartItem.cartId, userCart[0].id))
+        )
         .limit(1);
 
       if (existingItem.length === 0) {
@@ -132,11 +139,11 @@ export async function DELETE(
       }
 
       // Delete cart item
-      await db
-        .delete(cartItem)
-        .where(eq(cartItem.id, itemId));
+      await db.delete(cartItem).where(eq(cartItem.id, itemId));
 
-      return createSuccessResponse({ message: "Item removed from cart successfully" });
+      return createSuccessResponse({
+        message: "Item removed from cart successfully",
+      });
     } catch (error) {
       console.error("Error removing cart item:", error);
       return createErrorResponse("Failed to remove cart item", 500);
