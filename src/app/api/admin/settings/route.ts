@@ -115,30 +115,43 @@ export async function PUT(request: NextRequest) {
       .limit(1);
 
     if (existingSetting.length === 0) {
-      // Create new setting
-      const newSetting = await db
+      // Create new setting 
+      const newId = generateId();
+      await db
         .insert(systemSettings)
         .values({
-          id: generateId(),
+          id: newId,
           key,
           value,
           updatedAt: new Date(),
         })
-        .returning();
+        .execute();
 
-      return createSuccessResponse({ setting: newSetting[0] });
+      const inserted = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.id, newId))
+        .limit(1);
+
+      return createSuccessResponse({ setting: inserted[0] });
     } else {
-      // Update existing setting
-      const updatedSetting = await db
+      // Update existing setting 
+      await db
         .update(systemSettings)
         .set({
           value,
           updatedAt: new Date(),
         })
         .where(eq(systemSettings.key, key))
-        .returning();
+        .execute();
 
-      return createSuccessResponse({ setting: updatedSetting[0] });
+      const updated = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.key, key))
+        .limit(1);
+
+      return createSuccessResponse({ setting: updated[0] });
     }
   } catch (error) {
     console.error("Error updating setting:", error);

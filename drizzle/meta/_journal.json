@@ -1,54 +1,12 @@
 {
   "version": "7",
-  "dialect": "postgresql",
+  "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1756949827036,
-      "tag": "0000_amazing_magneto",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1759131635662,
-      "tag": "0001_free_tenebrous",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1759134640411,
-      "tag": "0002_handy_banshee",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1759140896893,
-      "tag": "0003_colorful_drax",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1759161206583,
-      "tag": "0004_brown_payback",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1759161300000,
-      "tag": "0005_add_buyer_service_fee",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1760165153059,
-      "tag": "0005_hot_wolfsbane",
+      "version": "5",
+      "when": 1761074362029,
+      "tag": "0000_youthful_nomad",
       "breakpoints": true
     }
   ]

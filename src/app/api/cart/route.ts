@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { cart, cartItem, product, store } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { 
-  withAuth, 
-  createErrorResponse, 
+import {
+  withAuth,
+  createErrorResponse,
   createSuccessResponse,
   validateRequestBody,
-  generateId
+  generateId,
 } from "@/lib/api-utils";
 import { addToCartSchema } from "@/lib/validations";
 
@@ -26,17 +26,18 @@ export async function GET(request: NextRequest) {
 
       if (userCart.length === 0) {
         // Create cart if doesn't exist
-        const newCart = await db
+        const newCartId = generateId();
+        await db
           .insert(cart)
           .values({
-            id: generateId(),
+            id: newCartId,
             userId: user.id,
             createdAt: new Date(),
             updatedAt: new Date(),
           })
-          .returning();
-        
-        userCart = newCart;
+          .execute();
+
+        userCart = [{ id: newCartId }];
       }
 
       // Get cart items with product details
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
       // Calculate total
       const total = items.reduce((sum, item) => {
         if (item.product?.price) {
-          return sum + (parseFloat(item.product.price) * item.quantity);
+          return sum + parseFloat(item.product.price) * item.quantity;
         }
         return sum;
       }, 0);
@@ -131,57 +132,78 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       if (userCart.length === 0) {
-        const newCart = await db
+        const newCartId = generateId();
+        await db
           .insert(cart)
           .values({
-            id: generateId(),
+            id: newCartId,
             userId: user.id,
             createdAt: new Date(),
             updatedAt: new Date(),
           })
-          .returning();
-        
-        userCart = newCart;
+          .execute();
+
+        userCart = [{ id: newCartId }];
       }
 
       // Check if item already exists in cart
       const existingItem = await db
         .select({ id: cartItem.id, quantity: cartItem.quantity })
         .from(cartItem)
-        .where(and(
-          eq(cartItem.cartId, userCart[0].id),
-          eq(cartItem.productId, productId)
-        ))
+        .where(
+          and(
+            eq(cartItem.cartId, userCart[0].id),
+            eq(cartItem.productId, productId)
+          )
+        )
         .limit(1);
 
       if (existingItem.length > 0) {
         // Update existing item
         const newQuantity = existingItem[0].quantity + quantity;
-        
+
         if (productData[0].stock < newQuantity) {
-          return createErrorResponse("Insufficient stock for requested quantity");
+          return createErrorResponse(
+            "Insufficient stock for requested quantity"
+          );
         }
 
-        const updatedItem = await db
+        await db
           .update(cartItem)
           .set({ quantity: newQuantity })
           .where(eq(cartItem.id, existingItem[0].id))
-          .returning();
+          .execute();
 
-        return createSuccessResponse(updatedItem[0]);
+        const updated = await db
+          .select({ id: cartItem.id, quantity: cartItem.quantity })
+          .from(cartItem)
+          .where(eq(cartItem.id, existingItem[0].id))
+          .limit(1);
+
+        return createSuccessResponse(updated[0]);
       } else {
         // Add new item
-        const newItem = await db
+        const newItemId = generateId();
+        await db
           .insert(cartItem)
           .values({
-            id: generateId(),
+            id: newItemId,
             cartId: userCart[0].id,
             productId,
             quantity,
           })
-          .returning();
+          .execute();
 
-        return createSuccessResponse(newItem[0], 201);
+        const inserted = await db
+          .select({
+            id: cartItem.id,
+            quantity: cartItem.quantity,
+          })
+          .from(cartItem)
+          .where(eq(cartItem.id, newItemId))
+          .limit(1);
+
+        return createSuccessResponse(inserted[0], 201);
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -208,9 +230,7 @@ export async function DELETE(request: NextRequest) {
       }
 
       // Delete all cart items
-      await db
-        .delete(cartItem)
-        .where(eq(cartItem.cartId, userCart[0].id));
+      await db.delete(cartItem).where(eq(cartItem.cartId, userCart[0].id));
 
       return createSuccessResponse({ message: "Cart cleared successfully" });
     } catch (error) {

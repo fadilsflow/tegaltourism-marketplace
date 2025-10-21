@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { product, store } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { 
-  withAuth, 
-  withoutAuth, 
-  createErrorResponse, 
+import {
+  withAuth,
+  withoutAuth,
+  createErrorResponse,
   createSuccessResponse,
-  validateRequestBody
+  validateRequestBody,
 } from "@/lib/api-utils";
 import { updateProductSchema } from "@/lib/validations";
 
@@ -69,7 +69,10 @@ export async function PUT(
   return withAuth(request, async (req, user) => {
     const { id } = await params;
 
-    const validationResult = await validateRequestBody(req, updateProductSchema);
+    const validationResult = await validateRequestBody(
+      req,
+      updateProductSchema
+    );
     if (validationResult.error) {
       return createErrorResponse(validationResult.error);
     }
@@ -114,16 +117,34 @@ export async function PUT(
       }
 
       // Update product
-      const updatedProduct = await db
+      await db
         .update(product)
         .set({
           ...updateData,
           updatedAt: new Date(),
         })
         .where(eq(product.id, id))
-        .returning();
+        .execute();
 
-      return createSuccessResponse(updatedProduct[0]);
+      const updated = await db
+        .select({
+          id: product.id,
+          storeId: product.storeId,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          price: product.price,
+          stock: product.stock,
+          image: product.image,
+          status: product.status,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+        })
+        .from(product)
+        .where(eq(product.id, id))
+        .limit(1);
+
+      return createSuccessResponse(updated[0]);
     } catch (error) {
       console.error("Error updating product:", error);
       return createErrorResponse("Failed to update product", 500);
@@ -164,9 +185,7 @@ export async function DELETE(
       }
 
       // Delete product
-      await db
-        .delete(product)
-        .where(eq(product.id, id));
+      await db.delete(product).where(eq(product.id, id));
 
       return createSuccessResponse({ message: "Product deleted successfully" });
     } catch (error) {
