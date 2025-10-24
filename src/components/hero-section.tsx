@@ -38,7 +38,6 @@ export default function HeroSection() {
                 <div className="relative lg:order-last order-first">
                   <div className="relative aspect-[4/3] w-full max-w-lg mx-auto lg:max-w-none">
                     <Image
-                      // src="https://res.cloudinary.com/dxurnpbrc/image/upload/v1757251427/jejak-rempah_pamwal.png"
                       src="/logo.png"
                       alt="Tegal Tourism - 360° Virtual Tourism Experience"
                       fill

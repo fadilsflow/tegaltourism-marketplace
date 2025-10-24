@@ -18,9 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marketplace Jejak Rempah Nusantara",
-  description:
-    "Menyusuri Warisan Budaya dan Petualangan Aromatik di Jalan Rempah-Rempah",
+  title: "Marketplace Tegal Tourism",
+  description: " Jelajahi Destinasi Wisata Tegal 360° dan Temukan Produk Khas dari Berbagai Lokasi Wisata Terbaik",
 };
 
 export default function RootLayout({
