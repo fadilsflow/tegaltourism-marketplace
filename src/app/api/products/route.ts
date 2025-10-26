@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Get search params with defaults
     const q = searchParams.get("q") || undefined;
+    const type = searchParams.get("type") || undefined; // "product" or "ticket"
     const minPrice = searchParams.get("minPrice")
       ? parseFloat(searchParams.get("minPrice")!)
       : undefined;
@@ -45,6 +46,10 @@ export async function GET(request: NextRequest) {
 
       if (q) {
         conditions.push(ilike(product.name, `%${q}%`));
+      }
+
+      if (type) {
+        conditions.push(eq(product.type, type));
       }
 
       if (minPrice !== undefined) {
@@ -85,6 +90,7 @@ export async function GET(request: NextRequest) {
           stock: product.stock,
           image: product.image,
           status: product.status,
+          type: product.type,
           createdAt: product.createdAt,
           updatedAt: product.updatedAt,
           store: {

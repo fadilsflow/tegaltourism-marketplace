@@ -100,6 +100,7 @@ export const product = pgTable("product", {
   stock: integer("stock").notNull(),
   image: text("image"),
   status: text("status").$defaultFn(() => "active"), // active, inactive
+  type: text("type").$defaultFn(() => "product"), // product, ticket
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -197,6 +198,24 @@ export const payment = pgTable("payment", {
   paymentType: varchar("payment_type", { length: 191 }), // e.g. bank_transfer, gopay
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+/* ======================
+   QR CODE FOR TICKETS
+   ====================== */
+export const ticketQr = pgTable("ticket_qr", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  orderId: varchar("order_id", { length: 191 })
+    .notNull()
+    .references(() => order.id, { onDelete: "cascade" }),
+  orderItemId: varchar("order_item_id", { length: 191 })
+    .notNull()
+    .references(() => orderItem.id, { onDelete: "cascade" }),
+  qrCode: text("qr_code").notNull(), // Base64 encoded QR code
+  qrData: text("qr_data").notNull(), // Data encoded in QR code
+  isUsed: boolean("is_used").$defaultFn(() => false),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 /* ======================

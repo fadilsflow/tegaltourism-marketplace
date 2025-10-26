@@ -32,9 +32,9 @@ export async function PATCH(
     const { role } = await request.json();
     const { id } = await params;
 
-    if (!role || !["admin", "user"].includes(role)) {
+    if (!role || !["admin", "user", "tourism-manager"].includes(role)) {
       return NextResponse.json(
-        { error: "Invalid role. Must be 'admin' or 'user'" },
+        { error: "Invalid role. Must be 'admin', 'user', or 'tourism-manager'" },
         { status: 400 }
       );
     }

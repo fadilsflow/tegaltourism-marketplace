@@ -16,6 +16,8 @@ import {
   AlertCircle,
   Truck,
   Loader2,
+  QrCode,
+  Download,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -240,6 +242,50 @@ export default function OrderDetailPage({
     }
   };
 
+  const handleDownloadQR = (qrCode: string, ticketName: string) => {
+    const link = document.createElement('a');
+    link.href = qrCode;
+    link.download = `qr-${ticketName.replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Generate QR codes mutation
+  const generateQrMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/orders/${id}/generate-qr`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate QR codes");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast.success("QR codes generated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+    },
+    onError: (error) => {
+      console.error("Error generating QR codes:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to generate QR codes"
+      );
+    },
+  });
+
+  const handleGenerateQR = () => {
+    if (confirm("Generate QR codes for this order? This action cannot be undone.")) {
+      generateQrMutation.mutate();
+    }
+  };
+
   // Handle authentication redirect
   React.useEffect(() => {
     if (!isPending && !session?.user) {
@@ -416,6 +462,85 @@ export default function OrderDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          {/* QR Codes for Tickets */}
+          {order.status === "paid" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <QrCode className="h-5 w-5" />
+                  QR Code Tiket
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {order.qrCodes && order.qrCodes.length > 0 ? (
+                  <div className="space-y-4">
+                    {order.qrCodes.map((qr: any, index: number) => (
+                      <div key={qr.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="font-medium">{qr.productName}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Jumlah: {qr.quantity} tiket
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadQR(qr.qrCode, qr.productName)}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </div>
+                        
+                        <div className="flex justify-center">
+                          <img
+                            src={qr.qrCode}
+                            alt={`QR Code untuk ${qr.productName}`}
+                            className="w-32 h-32 border rounded"
+                          />
+                        </div>
+                        
+                        <div className="mt-3 text-center">
+                          <p className="text-xs text-muted-foreground">
+                            Scan QR code ini untuk verifikasi tiket
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Status: {qr.isUsed ? "Sudah Digunakan" : "Belum Digunakan"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <QrCode className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">QR Code Belum Tersedia</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Generate QR code untuk tiket wisata Anda
+                    </p>
+                    <Button
+                      onClick={handleGenerateQR}
+                      disabled={generateQrMutation.isPending}
+                    >
+                      {generateQrMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <QrCode className="mr-2 h-4 w-4" />
+                          Generate QR Code
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Order Summary */}

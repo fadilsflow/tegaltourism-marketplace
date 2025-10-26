@@ -10,6 +10,7 @@ import {
   Search,
   Shield,
   User,
+  Building2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,13 @@ const roleConfig = {
     color: "text-blue-600",
     bgColor: "bg-blue-50",
     icon: User,
+  },
+  "tourism-manager": {
+    label: "Tourism Manager",
+    variant: "outline" as const,
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    icon: Building2,
   },
 };
 
@@ -325,6 +333,7 @@ export default function ManageUsersPage() {
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
             <SelectItem value="user">User</SelectItem>
+            <SelectItem value="tourism-manager">Tourism Manager</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -430,29 +439,33 @@ export default function ManageUsersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleRoleChange(
-                                user.id,
-                                user.role === "admin" ? "user" : "admin"
-                              )
-                            }
-                            disabled={updateRoleMutation.isPending}
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const newRole = user.role === "admin" ? "user" : "admin";
-                              handleRoleChange(user.id, newRole);
-                            }}
-                            disabled={updateRoleMutation.isPending}
-                          >
-                            <User className="mr-2 h-4 w-4" />
-                            Switch to {user.role === "admin" ? "User" : "Admin"}
-                          </DropdownMenuItem>
+                          {user.role !== "admin" && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user.id, "admin")}
+                              disabled={updateRoleMutation.isPending}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Make Admin
+                            </DropdownMenuItem>
+                          )}
+                          {user.role !== "user" && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user.id, "user")}
+                              disabled={updateRoleMutation.isPending}
+                            >
+                              <User className="mr-2 h-4 w-4" />
+                              Make User
+                            </DropdownMenuItem>
+                          )}
+                          {user.role !== "tourism-manager" && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user.id, "tourism-manager")}
+                              disabled={updateRoleMutation.isPending}
+                            >
+                              <Building2 className="mr-2 h-4 w-4" />
+                              Make Tourism Manager
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

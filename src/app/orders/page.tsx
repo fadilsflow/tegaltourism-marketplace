@@ -337,8 +337,8 @@ export default function OrdersPage() {
           {filteredOrders.map((order: Order) => {
             const status = statusConfig[order.status];
             const StatusIcon = status.icon;
-            const firstItem = order.items[0];
-            const itemCount = order.items.length;
+            const firstItem = order.items?.[0];
+            const itemCount = order.items?.length || 0;
 
             return (
               <Card key={order.id}>
@@ -374,35 +374,53 @@ export default function OrdersPage() {
                   </div>
 
                   {/* Order Items Preview */}
-                  <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
-                    <div className="relative w-12 h-12 flex-shrink-0 border rounded-lg overflow-hidden">
-                      {firstItem.product.image ? (
-                        <Image
-                          fill
-                          src={firstItem.product.image}
-                          alt={firstItem.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
+                  {firstItem ? (
+                    <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
+                      <div className="relative w-12 h-12 flex-shrink-0 border rounded-lg overflow-hidden">
+                        {firstItem.product?.image ? (
+                          <Image
+                            fill
+                            src={firstItem.product.image}
+                            alt={firstItem.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {firstItem.product?.name || "Unknown Product"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {firstItem.store?.name || "Unknown Store"}
+                        </p>
+                        {itemCount > 1 && (
+                          <p className="text-xs text-muted-foreground">
+                            +{itemCount - 1} more item{itemCount > 2 ? "s" : ""}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
+                      <div className="relative w-12 h-12 flex-shrink-0 border rounded-lg overflow-hidden">
                         <div className="w-full h-full bg-muted flex items-center justify-center">
                           <Package className="h-4 w-4 text-muted-foreground" />
                         </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {firstItem.product.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {firstItem.store.name}
-                      </p>
-                      {itemCount > 1 && (
-                        <p className="text-xs text-muted-foreground">
-                          +{itemCount - 1} more item{itemCount > 2 ? "s" : ""}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          No items found
                         </p>
-                      )}
+                        <p className="text-xs text-muted-foreground">
+                          This order has no items
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Actions */}
                   <div className="flex justify-end gap-2">
