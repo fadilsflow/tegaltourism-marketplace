@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { order, orderItem, product, store, address } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { order, orderItem, product, store, address, ticketQr } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import {
   withAuth,
   createErrorResponse,
@@ -9,6 +9,8 @@ import {
   validateRequestBody,
 } from "@/lib/api-utils";
 import { updateOrderStatusSchema } from "@/lib/validations";
+import { generateQRCode, generateTicketQRData } from "@/lib/qr-utils";
+import { nanoid } from "nanoid";
 
 /**
  * GET /api/orders/[id] - Get a specific order
@@ -95,6 +97,7 @@ export async function GET(
             name: product.name,
             slug: product.slug,
             image: product.image,
+            type: product.type,
           },
           store: {
             id: store.id,
@@ -107,9 +110,33 @@ export async function GET(
         .leftJoin(store, eq(orderItem.storeId, store.id))
         .where(eq(orderItem.orderId, id));
 
+      // Get QR codes for ticket items if order is paid
+      let qrCodes = [];
+      if (orderInfo.status === "paid") {
+        qrCodes = await db
+          .select({
+            id: ticketQr.id,
+            orderItemId: ticketQr.orderItemId,
+            qrCode: ticketQr.qrCode,
+            qrData: ticketQr.qrData,
+            isUsed: ticketQr.isUsed,
+            usedAt: ticketQr.usedAt,
+            productName: product.name,
+            quantity: orderItem.quantity,
+          })
+          .from(ticketQr)
+          .innerJoin(orderItem, eq(ticketQr.orderItemId, orderItem.id))
+          .innerJoin(product, eq(orderItem.productId, product.id))
+          .where(and(
+            eq(ticketQr.orderId, id),
+            eq(product.type, "ticket")
+          ));
+      }
+
       return createSuccessResponse({
         ...orderInfo,
         items,
+        qrCodes,
       });
     } catch (error) {
       console.error("Error fetching order:", error);
@@ -192,6 +219,52 @@ export async function PUT(
         })
         .where(eq(order.id, id))
         .execute();
+
+      // Generate QR codes for ticket orders when status is updated to "paid"
+      if (status === "paid") {
+        try {
+          // Get all ticket items in this order
+          const ticketItems = await db
+            .select({
+              id: orderItem.id,
+              productId: orderItem.productId,
+              quantity: orderItem.quantity,
+              productName: product.name,
+            })
+            .from(orderItem)
+            .innerJoin(product, eq(orderItem.productId, product.id))
+            .where(and(
+              eq(orderItem.orderId, id),
+              eq(product.type, "ticket")
+            ));
+
+          // Generate QR code for each ticket item
+          for (const item of ticketItems) {
+            for (let i = 0; i < item.quantity; i++) {
+              const qrData = generateTicketQRData(
+                id,
+                item.id,
+                item.productName
+              );
+              
+              const qrCode = await generateQRCode(qrData);
+              
+              await db.insert(ticketQr).values({
+                id: nanoid(),
+                orderId: id,
+                orderItemId: item.id,
+                qrCode,
+                qrData,
+                isUsed: false,
+                createdAt: new Date(),
+              });
+            }
+          }
+        } catch (qrError) {
+          console.error("Error generating QR codes:", qrError);
+          // Don't fail the order update if QR generation fails
+        }
+      }
 
       const updated = await db
         .select({

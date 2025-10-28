@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import crypto from "crypto";
 import { db } from "@/db";
-import { payment, order } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { payment, order, orderItem, product, ticketQr } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { generateQRCode, generateTicketQRData } from "@/lib/qr-utils";
+import { nanoid } from "nanoid";
 
 /**
  * POST /api/payments/webhook - Handle Midtrans payment notifications
@@ -90,6 +92,52 @@ export async function POST(request: NextRequest) {
         .update(order)
         .set({ status: orderStatus, updatedAt: new Date() })
         .where(eq(order.id, paymentData[0].orderId));
+
+      // Generate QR codes for ticket orders when payment is confirmed
+      if (orderStatus === "paid") {
+        try {
+          // Get all ticket items in this order
+          const ticketItems = await db
+            .select({
+              id: orderItem.id,
+              productId: orderItem.productId,
+              quantity: orderItem.quantity,
+              productName: product.name,
+            })
+            .from(orderItem)
+            .innerJoin(product, eq(orderItem.productId, product.id))
+            .where(and(
+              eq(orderItem.orderId, paymentData[0].orderId),
+              eq(product.type, "ticket")
+            ));
+
+          // Generate QR code for each ticket item
+          for (const item of ticketItems) {
+            for (let i = 0; i < item.quantity; i++) {
+              const qrData = generateTicketQRData(
+                paymentData[0].orderId,
+                item.id,
+                item.productName
+              );
+              
+              const qrCode = await generateQRCode(qrData);
+              
+              await db.insert(ticketQr).values({
+                id: nanoid(),
+                orderId: paymentData[0].orderId,
+                orderItemId: item.id,
+                qrCode,
+                qrData,
+                isUsed: false,
+                createdAt: new Date(),
+              });
+            }
+          }
+        } catch (qrError) {
+          console.error("[Webhook] Error generating QR codes:", qrError);
+          // Don't fail the webhook if QR generation fails
+        }
+      }
     }
 
     // Minimal logging

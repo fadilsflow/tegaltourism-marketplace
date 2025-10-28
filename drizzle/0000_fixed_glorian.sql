@@ -90,6 +90,7 @@ CREATE TABLE `product` (
 	`stock` int NOT NULL,
 	`image` text,
 	`status` text,
+	`type` text,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `product_id` PRIMARY KEY(`id`),
@@ -135,6 +136,18 @@ CREATE TABLE `system_settings` (
 	CONSTRAINT `system_settings_key_unique` UNIQUE(`key`)
 );
 --> statement-breakpoint
+CREATE TABLE `ticket_qr` (
+	`id` varchar(191) NOT NULL,
+	`order_id` varchar(191) NOT NULL,
+	`order_item_id` varchar(191) NOT NULL,
+	`qr_code` text NOT NULL,
+	`qr_data` text NOT NULL,
+	`is_used` boolean,
+	`used_at` timestamp,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `ticket_qr_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
 CREATE TABLE `user` (
 	`id` varchar(191) NOT NULL,
 	`name` text NOT NULL,
@@ -174,4 +187,6 @@ ALTER TABLE `order_item` ADD CONSTRAINT `order_item_store_id_store_id_fk` FOREIG
 ALTER TABLE `payment` ADD CONSTRAINT `payment_order_id_order_id_fk` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `product` ADD CONSTRAINT `product_store_id_store_id_fk` FOREIGN KEY (`store_id`) REFERENCES `store`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `session` ADD CONSTRAINT `session_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `store` ADD CONSTRAINT `store_owner_id_user_id_fk` FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;
+ALTER TABLE `store` ADD CONSTRAINT `store_owner_id_user_id_fk` FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `ticket_qr` ADD CONSTRAINT `ticket_qr_order_id_order_id_fk` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `ticket_qr` ADD CONSTRAINT `ticket_qr_order_item_id_order_item_id_fk` FOREIGN KEY (`order_item_id`) REFERENCES `order_item`(`id`) ON DELETE cascade ON UPDATE no action;

@@ -69,6 +69,11 @@ export function UserButton() {
             <Link href="/admin/dashboard">Admin Dashboard</Link>
           </DropdownMenuItem>
         )}
+        {session?.user?.role === "tourism-manager" && (
+          <DropdownMenuItem asChild>
+            <Link href="/tourism-manager/dashboard">Dashboard Tourism Manager</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/orders">Pesanan</Link>
         </DropdownMenuItem>
