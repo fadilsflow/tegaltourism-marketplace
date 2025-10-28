@@ -9,6 +9,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+type Ticket = {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  description?: string;
+  status: string;
+};
+
 export default function TourismManagerTickets() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -107,7 +116,7 @@ export default function TourismManagerTickets() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tickets?.tickets?.map((ticket: any) => (
+          {tickets?.tickets?.map((ticket: Ticket) => (
             <Card key={ticket.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">

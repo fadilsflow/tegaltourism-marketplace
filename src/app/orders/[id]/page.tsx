@@ -48,6 +48,14 @@ type OrderItem = {
   };
 };
 
+type QRCode = {
+  id: string;
+  productName: string;
+  quantity: number;
+  qrCode: string;
+  isUsed: boolean;
+};
+
 
 
 const statusConfig = {
@@ -475,7 +483,7 @@ export default function OrderDetailPage({
               <CardContent>
                 {order.qrCodes && order.qrCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {order.qrCodes.map((qr: any, index: number) => (
+                    {order.qrCodes.map((qr: QRCode) => (
                       <div key={qr.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -495,7 +503,9 @@ export default function OrderDetailPage({
                         </div>
                         
                         <div className="flex justify-center">
-                          <img
+                          <Image
+                            width={128}
+                            height={128}
                             src={qr.qrCode}
                             alt={`QR Code untuk ${qr.productName}`}
                             className="w-32 h-32 border rounded"

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/image-upload";
@@ -24,7 +24,14 @@ export default function NewTicketPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: {
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      image: string;
+      type: string;
+    }) => {
       const response = await fetch("/api/tourism-manager/tickets", {
         method: "POST",
         headers: {

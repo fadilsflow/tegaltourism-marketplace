@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, price, stock, image, type } = await request.json();
+    const { name, description, price, stock, image } = await request.json();
 
     if (!name || !price || !stock) {
       return NextResponse.json(
@@ -88,7 +88,17 @@ export async function POST(request: NextRequest) {
         description: "Tempat wisata yang dikelola",
       });
 
-      tourismStore = [{ id: storeId }];
+      tourismStore = [{ 
+        id: storeId,
+        ownerId: session.user.id,
+        name: `${session.user.name} Tourism`,
+        slug: storeSlug,
+        areaId: null,
+        description: "Tempat wisata yang dikelola",
+        logo: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }];
     }
 
     const storeId = tourismStore[0].id;

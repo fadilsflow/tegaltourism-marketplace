@@ -111,7 +111,16 @@ export async function GET(
         .where(eq(orderItem.orderId, id));
 
       // Get QR codes for ticket items if order is paid
-      let qrCodes = [];
+      let qrCodes: Array<{
+        id: string;
+        orderItemId: string;
+        qrCode: string;
+        qrData: string;
+        isUsed: boolean | null;
+        usedAt: Date | null;
+        productName: string;
+        quantity: number;
+      }> = [];
       if (orderInfo.status === "paid") {
         qrCodes = await db
           .select({

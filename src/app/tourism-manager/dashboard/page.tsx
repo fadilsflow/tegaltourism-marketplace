@@ -5,6 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, DollarSign, TrendingUp } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
+type PopularTicket = {
+  id: string;
+  name: string;
+  price: number;
+  soldCount: number;
+};
+
+type RecentOrder = {
+  id: string;
+  createdAt: string;
+  total: number;
+  status: string;
+};
+
 export default function TourismManagerDashboard() {
   const { data: session } = authClient.useSession();
   
@@ -129,7 +143,7 @@ export default function TourismManagerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats?.popularTickets?.map((ticket: any, index: number) => (
+              {stats?.popularTickets?.map((ticket: PopularTicket) => (
                 <div key={ticket.id} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{ticket.name}</p>
@@ -154,7 +168,7 @@ export default function TourismManagerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats?.recentOrders?.map((order: any) => (
+              {stats?.recentOrders?.map((order: RecentOrder) => (
                 <div key={order.id} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">#{order.id.slice(-8)}</p>

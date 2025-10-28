@@ -12,8 +12,6 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Truck,
-  MapPin,
   User,
   QrCode,
 } from "lucide-react";

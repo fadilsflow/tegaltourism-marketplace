@@ -7,6 +7,24 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, QrCode } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import Image from "next/image";
+
+type QRCode = {
+  id: string;
+  productName: string;
+  quantity: number;
+  qrCode: string;
+  isUsed: boolean;
+};
+
+type OrderItem = {
+  product: {
+    name: string;
+    image?: string;
+  };
+  quantity: number;
+  price: number;
+};
 
 export default function TourismManagerOrderDetail() {
   const params = useParams();
@@ -161,7 +179,7 @@ export default function TourismManagerOrderDetail() {
           <CardContent>
             {order.status === "paid" ? (
               <div className="space-y-4">
-                {order.qrCodes?.map((qr: any, index: number) => (
+                {order.qrCodes?.map((qr: QRCode) => (
                   <div key={qr.id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -181,7 +199,9 @@ export default function TourismManagerOrderDetail() {
                     </div>
                     
                     <div className="flex justify-center">
-                      <img
+                      <Image
+                        width={128}
+                        height={128}
                         src={qr.qrCode}
                         alt={`QR Code untuk ${qr.productName}`}
                         className="w-32 h-32 border rounded"
@@ -218,11 +238,13 @@ export default function TourismManagerOrderDetail() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {order.items?.map((item: any, index: number) => (
+            {order.items?.map((item: OrderItem, index: number) => (
               <div key={index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-4">
                   {item.product?.image && (
-                    <img
+                    <Image
+                      width={64}
+                      height={64}
                       src={item.product.image}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded"

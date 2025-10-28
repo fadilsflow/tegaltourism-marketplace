@@ -54,7 +54,13 @@ export default function EditTicketPage() {
   }, [ticket]);
 
   const updateMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: {
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      image: string;
+    }) => {
       const response = await fetch(`/api/tourism-manager/tickets/${ticketId}`, {
         method: "PUT",
         headers: {
