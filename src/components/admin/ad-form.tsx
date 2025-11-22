@@ -78,6 +78,8 @@ export function AdForm({ initialData, adId }: AdFormProps) {
             toast.success(isEditing ? "Ad updated" : "Ad created");
             // Invalidate the query to ensure the list is updated when navigating back
             queryClient.invalidateQueries({ queryKey: ["admin-ads"] });
+            // Invalidate active ads to update carousel immediately
+            queryClient.invalidateQueries({ queryKey: ["active-ads"] });
             router.push("/admin/ads");
             router.refresh();
         },

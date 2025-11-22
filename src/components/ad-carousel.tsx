@@ -4,21 +4,21 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { claimAdReward, trackAdClick, trackAdImpression } from "@/actions/ads";
+import { claimAdReward, trackAdClick, trackAdImpression, getActiveAds } from "@/actions/ads";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
-interface Ad {
-    id: string;
-    imageUrl: string;
-    title: string;
-    targetUrl: string;
-    rewardCoin: number;
-}
-
-export function AdCarousel({ ads }: { ads: Ad[] }) {
+export function AdCarousel() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const queryClient = useQueryClient();
+
+    // Fetch ads using React Query for real-time updates
+    const { data: ads, isLoading } = useQuery({
+        queryKey: ["active-ads"],
+        queryFn: () => getActiveAds(),
+        refetchInterval: 30000, // Refetch every 30 seconds
+        staleTime: 20000, // Consider data stale after 20 seconds
+    });
 
     const currentAd = ads && ads.length > 0 ? ads[currentIndex] : null;
 
@@ -37,6 +37,19 @@ export function AdCarousel({ ads }: { ads: Ad[] }) {
             trackAdImpression(currentAd.id).catch(console.error);
         }
     }, [currentAd]);
+
+    // Reset index if ads change
+    useEffect(() => {
+        if (ads && currentIndex >= ads.length) {
+            setCurrentIndex(0);
+        }
+    }, [ads, currentIndex]);
+
+    if (isLoading) {
+        return (
+            <div className="relative w-full aspect-[21/4] group animate-pulse bg-muted rounded-lg" />
+        );
+    }
 
     if (!ads || ads.length === 0 || !currentAd) {
         return null;
@@ -79,7 +92,7 @@ export function AdCarousel({ ads }: { ads: Ad[] }) {
     return (
         <div className="relative w-full aspect-[21/4] group">
             <div
-                className="relative w-full h-full overflow-hidden cursor-pointer"
+                className="relative w-full h-full overflow-hidden cursor-pointer rounded-lg"
                 onClick={handleAdClick}
             >
                 <Image

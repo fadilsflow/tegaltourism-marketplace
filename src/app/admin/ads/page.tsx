@@ -29,6 +29,7 @@ export default function AdsPage() {
         mutationFn: deleteAd,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["admin-ads"] });
+            queryClient.invalidateQueries({ queryKey: ["active-ads"] });
             toast.success("Ad deleted successfully");
         },
         onError: () => {

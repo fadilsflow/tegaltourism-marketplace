@@ -3,13 +3,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "./ui/badge";
 import LogoCloud from "./logo-cloud";
-import { getActiveAds } from "@/actions/ads";
 import { AdCarousel } from "./ad-carousel";
 import Image from "next/image";
 
-export default async function HeroSection() {
-  const ads = await getActiveAds();
-
+export default function HeroSection() {
   return (
     <>
       <main className="overflow-hidden pb-28">
@@ -57,7 +54,7 @@ export default async function HeroSection() {
           </div>
           <LogoCloud />
           <div className="relative mx-auto container w-full  px-6 md:px-12 group">
-            <AdCarousel ads={ads} />
+            <AdCarousel />
           </div>
 
         </section>

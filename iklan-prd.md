@@ -9,7 +9,7 @@ Fitur ini memungkinkan pengguna melihat iklan di hero section aplikasi. Saat pen
 
 ---
 
-# 2. Objectives
+# 2. Objectives   
 
 * Menyediakan mekanisme penayangan iklan pada hero section.
 * Memberikan reward coin secara aman ketika pengguna berinteraksi dengan iklan.
