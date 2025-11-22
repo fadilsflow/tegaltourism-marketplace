@@ -1,4 +1,4 @@
-"use client ";
+"use client";
 
 import {
   ProductCard,
@@ -28,8 +28,8 @@ export default function ProductList({
           sortBy === "latest"
             ? "createdAt"
             : sortBy === "trending"
-            ? "createdAt"
-            : "name",
+              ? "createdAt"
+              : "name",
         sortOrder: "desc",
         type: "product", // Only fetch products, exclude tickets
       });

@@ -28,8 +28,8 @@ export default function TicketList({
           sortBy === "latest"
             ? "createdAt"
             : sortBy === "trending"
-            ? "createdAt"
-            : "name",
+              ? "createdAt"
+              : "name",
         sortOrder: "desc",
         type: "ticket",
       });

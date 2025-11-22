@@ -1,17 +1,22 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "./ui/badge";
 import LogoCloud from "./logo-cloud";
+import { getActiveAds } from "@/actions/ads";
+import { AdCarousel } from "./ad-carousel";
+import Image from "next/image";
 
-export default function HeroSection() {
+export default async function HeroSection() {
+  const ads = await getActiveAds();
+
   return (
     <>
       <main className="overflow-hidden pb-28">
-        <section>
+        <section className="flex flex-col gap-8">
+
           <div className="relative pt-5 ">
-            <div className="container mx-auto px-6 md:px-12">
+            <div className="container mx-auto   px-6 md:px-12">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Left side - Text content */}
                 <div className="flex flex-col">
@@ -34,7 +39,7 @@ export default function HeroSection() {
                   </div>
                 </div>
 
-                {/* Right side - Hero image */}
+                {/* Right side - Hero image / Ads */}
                 <div className="relative lg:order-last order-first">
                   <div className="relative aspect-[4/3] w-full max-w-lg mx-auto lg:max-w-none">
                     <Image
@@ -45,11 +50,16 @@ export default function HeroSection() {
                       priority
                     />
                   </div>
+
                 </div>
               </div>
             </div>
           </div>
           <LogoCloud />
+          <div className="relative mx-auto container w-full  px-6 md:px-12 group">
+            <AdCarousel ads={ads} />
+          </div>
+
         </section>
       </main>
     </>

@@ -10,6 +10,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-export const db = drizzle(pool);
+export const db = drizzle(pool, { schema: authSchema, mode: "default" });
 
 export { authSchema };

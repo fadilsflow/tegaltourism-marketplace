@@ -194,6 +194,25 @@ export const searchSchema = z.object({
     .string()
     .transform((val) => (val ? parseFloat(val) : undefined))
     .optional(),
-  sortBy: z.enum(["name", "price", "createdAt"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  sortBy: z.string().optional(),
 });
+
+/* ======================
+   AD VALIDATIONS
+   ====================== */
+export const createAdSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  description: z.string().optional(),
+  imageUrl: z.string().url("Invalid image URL"),
+  targetUrl: z.string().url("Invalid target URL"),
+  rewardCoin: z.coerce.number().int().min(0, "Reward must be positive"),
+  startDate: z.coerce.date().refine((date) => !isNaN(date.getTime()), "Invalid date"),
+  endDate: z.coerce.date().refine((date) => !isNaN(date.getTime()), "Invalid date"),
+  quota: z.number().int().min(0).nullable().optional(),
+  status: z.enum(["draft", "published"]).default("draft"),
+  sortOrder: z.coerce.number().int().default(0),
+});
+
+export const updateAdSchema = createAdSchema.partial();
+
