@@ -6,6 +6,7 @@ import {
   decimal as numeric,
   int as integer,
   varchar,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 
 /* ======================
@@ -226,6 +227,24 @@ export const systemSettings = pgTable("system_settings", {
   key: varchar("key", { length: 191 }).notNull().unique(),
   value: text("value").notNull(),
   description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+/* ======================
+   USER DETAILS MOBILE APP
+   ====================== */
+export const userDetailsJegal = pgTable("user_details_jegal", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  userId: varchar("user_id", { length: 191 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  data: text("data"),
+  contact: text("contact"),
+  businessName: text("business_name"),
+  isVerified: mysqlEnum("is_verified", ["Menunggu", "Disetujui", "Arsip"])
+    .default("Menunggu")
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -8,6 +8,13 @@
       "when": 1761358154013,
       "tag": "0000_fixed_glorian",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763264588541,
+      "tag": "0001_modern_sentinel",
+      "breakpoints": true
     }
   ]
 }
