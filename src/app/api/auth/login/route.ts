@@ -9,21 +9,21 @@ export async function POST(req: Request) {
     const { email, password, kind } = await req.json();
     if (!email || !password) {
       return NextResponse.json(
-      { 
-        status: false,
-        message: "email & password wajib" 
-      }, 
-      { status: 400 });
+        {
+          status: false,
+          message: "email & password wajib"
+        },
+        { status: 400 });
     }
 
     // cari user
     const users = await db.select().from(user).where(eq(user.email, email));
     if (!users.length) {
       return NextResponse.json(
-        { 
+        {
           status: false,
-          message: "User tidak ditemukan" 
-        }, 
+          message: "User tidak ditemukan"
+        },
         { status: 404 });
     }
     const foundUser = users[0];
@@ -33,20 +33,20 @@ export async function POST(req: Request) {
     const emailAccount = accRows.find(a => a.providerId === "email");
     if (!emailAccount || !emailAccount.password) {
       return NextResponse.json(
-        { 
+        {
           status: false,
-          message: "Akun tidak memiliki password" 
-        }, 
+          message: "Akun tidak memiliki password"
+        },
         { status: 400 });
     }
 
     const ok = await verifyPassword(password, emailAccount.password);
     if (!ok) {
       return NextResponse.json(
-        { 
+        {
           status: false,
-          message: "Password salah" 
-        }, 
+          message: "Password salah"
+        },
         { status: 401 });
     }
 
@@ -76,16 +76,16 @@ export async function POST(req: Request) {
         if (jsonRole.status) {
           role = jsonRole.data;
         }
-      } catch (err) {
+      } catch {
         // Jika fetch gagal, biarkan id_entity dan id_kategori tetap null
       }
     }
 
     if (kind === "m" && foundUser.role === "1") {
       return NextResponse.json(
-        { 
-          status  : false,
-          message : 'Login gagal: akun pengunjung tidak dapat login sebagai pengelola' 
+        {
+          status: false,
+          message: 'Login gagal: akun pengunjung tidak dapat login sebagai pengelola'
         },
         { status: 401 }
       );
@@ -97,8 +97,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       redirect: false,
       token: createdSession.token,
-      status  : true,
-      message : 'Login successful!',
+      status: true,
+      message: 'Login successful!',
       session: {
         id: createdSession.id,
         token: createdSession.token,
@@ -121,13 +121,13 @@ export async function POST(req: Request) {
         role
       },
     }, { status: 200 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     return NextResponse.json(
-      { 
+      {
         status: false,
-        message: err.message || "Server error" 
-      }, 
+        message: (err as Error).message || "Server error"
+      },
       { status: 500 });
   }
 }

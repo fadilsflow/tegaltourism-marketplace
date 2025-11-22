@@ -61,8 +61,8 @@ export async function POST(req: Request) {
 
     // format response identik Better Auth (plus session object)
     return NextResponse.json({
-      status  : true,
-      message : 'Register successful!',
+      status: true,
+      message: 'Register successful!',
       redirect: false,
       token: createdSession.token,
       session: {
@@ -85,8 +85,8 @@ export async function POST(req: Request) {
         updatedAt: createdUser.updatedAt?.toISOString?.(),
       },
     }, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return NextResponse.json({ status: false, message: err.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ status: false, message: (err as Error).message || "Server error" }, { status: 500 });
   }
 }
