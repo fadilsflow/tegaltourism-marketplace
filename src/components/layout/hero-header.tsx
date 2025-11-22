@@ -203,6 +203,7 @@ export function Header() {
                     Mitra
                   </Button>
                 </Link>
+                <CoinBalance />
                 <UserButton />
               </>
             ) : (
@@ -214,5 +215,24 @@ export function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+function CoinBalance() {
+  const { data: balance } = useQuery({
+    queryKey: ["user-coin-balance"],
+    queryFn: async () => {
+      const { getUserCoinBalance } = await import("@/actions/ads");
+      return getUserCoinBalance();
+    },
+  });
+
+  if (balance === undefined || balance === null) return null;
+
+  return (
+    <div className="flex items-center gap-1 px-2 py-0.5 text-sm font-medium border rounded">
+      <span className="text-lg">🪙</span>
+      <span>{balance}</span>
+    </div>
   );
 }

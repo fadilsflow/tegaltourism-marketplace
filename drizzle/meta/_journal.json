@@ -15,6 +15,13 @@
       "when": 1763264588541,
       "tag": "0001_modern_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763811793336,
+      "tag": "0002_eminent_amazoness",
+      "breakpoints": true
     }
   ]
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { LayoutDashboard, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
@@ -21,10 +21,16 @@ const navigationItems = [
     name: "Service Fee",
     href: "/admin/service-fee",
     icon: Settings,
+
+  },
+  {
+    name: "Iklan",
+    href: "/admin/ads",
+    icon: Megaphone,
   },
 ];
 
-  export function SuperAdminHeader() {
+export function SuperAdminHeader() {
   const pathname = usePathname();
 
   return (

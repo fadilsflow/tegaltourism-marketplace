@@ -248,3 +248,48 @@ export const userDetailsJegal = pgTable("user_details_jegal", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+/* ======================
+   ADS & REWARDS
+   ====================== */
+export const ads = pgTable("ads", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  targetUrl: text("target_url").notNull(),
+  rewardCoin: integer("reward_coin").notNull().default(0),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  quota: integer("quota"), // nullable
+  status: text("status").$defaultFn(() => "draft"), // draft, published
+  sortOrder: integer("sort_order").default(0),
+  clicks: integer("clicks").default(0).notNull(),
+  impressions: integer("impressions").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const adClaims = pgTable("ad_claims", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  adId: varchar("ad_id", { length: 191 })
+    .notNull()
+    .references(() => ads.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 191 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  claimedAt: timestamp("claimed_at").defaultNow().notNull(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: varchar("id", { length: 191 }).primaryKey(),
+  userId: varchar("user_id", { length: 191 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  type: text("type").notNull(), // reward_ad
+  adId: varchar("ad_id", { length: 191 }).references(() => ads.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
